@@ -1,20 +1,22 @@
-# Mini ERP System
+# MiniERP System
 
-A simple ERP-style inventory management system built in C# using .NET.
+A console-based ERP-style system built in C# using .NET and SQLite.
 
 ## Features
 
-- Add products
-- View inventory
-- Create orders
+- Product management (add + view inventory)
+- Customer management
+- Create orders with multiple products
 - Automatic stock updates
-- Input validation (prevents crashes)
-- Auto-incrementing product IDs
+- Order receipts with total price
+- Data persistence using SQLite database
 
 ## Technologies
 
 - C#
-- .NET Console Application
+- .NET
+- Entity Framework Core
+- SQLite
 
 ## How to run
 
@@ -24,22 +26,23 @@ A simple ERP-style inventory management system built in C# using .NET.
 
 dotnet run
 
-## Example usage
+## Example flow
 
-1. Add a product
-2. View inventory
-3. Create an order
-4. See stock update in real-time
+1. Add a customer
+2. Add products
+3. Create a full order
+4. View inventory updates
 
 ## Project structure
 
-- Models/ → Data models (Product, Order)
-- Services/ → Business logic (InventoryService)
-- Program.cs → Main application logic
+- Models/ → Data models (Product, Customer, Order, OrderLine)
+- Services/ → Business logic
+- Data/ → Database context
+- Program.cs → Main UI / menu
 
 ## Future improvements
 
-- Database integration (SQLite)
-- Customer management
-- Invoice system
+- Show order history
+- Invoice generation
 - REST API
+- UI (web or desktop)

@@ -1,7 +1,10 @@
-﻿using MiniERP.Models;
+﻿using System.Collections.Generic;
+using MiniERP.Models;
 using MiniERP.Services;
 
 var inventory = new InventoryService();
+
+inventory.AddCustomer(new Customer { Name = "Test Customer" });
 
 bool running = true;
 
@@ -9,10 +12,12 @@ while (running)
 {
     Console.Clear();
     Console.WriteLine("=== Mini ERP System ===");
+    Console.WriteLine("0. Exit");
     Console.WriteLine("1. Add product");
     Console.WriteLine("2. Show inventory");
     Console.WriteLine("3. Create order");
-    Console.WriteLine("4. Exit");
+    Console.WriteLine("4. Add customer");
+    Console.WriteLine("5. Create full order");
     Console.WriteLine("------------------------");
     Console.Write("Choose an option: ");
 
@@ -20,6 +25,10 @@ while (running)
 
     switch (input)
     {
+        case "0":
+            running = false;
+            break;
+        
         case "1":
             Console.Write("Product name: ");
             var name = Console.ReadLine();
@@ -61,15 +70,65 @@ while (running)
             Console.Write("Quantity: ");
             int quantity = int.Parse(Console.ReadLine() ?? "0");
 
-            inventory.CreateOrder(new Order
-            {
-                ProductId = productId,
-                Quantity = quantity
-            });
+            inventory.CreateOrder(productId, quantity);
             break;
 
         case "4":
-            running = false;
+            Console.Write("Customer name: ");
+            var customerName = Console.ReadLine();
+
+            inventory.AddCustomer(new Customer
+            {
+                Name = customerName ?? ""
+            });
+
+            Console.WriteLine("Customer added!");
+            break;
+
+        case "5":
+            Console.Write("Customer ID: ");
+            int customerId;
+
+            while (!int.TryParse(Console.ReadLine(), out customerId))
+            {
+                Console.Write("Invalid input. Enter customer ID again: ");
+            }
+
+            var items = new List<(int productId, int quantity)>();
+
+            bool addingProducts = true;
+
+            while (addingProducts)
+            {
+                Console.Write("Product ID: ");
+                int orderProductId;   // 👈 ændret navn
+
+                while (!int.TryParse(Console.ReadLine(), out orderProductId))
+                {
+                    Console.Write("Invalid input. Enter product ID again: ");
+                }
+
+                Console.Write("Quantity: ");
+                int orderQuantity;    // 👈 ændret navn
+
+                while (!int.TryParse(Console.ReadLine(), out orderQuantity))
+                {
+                    Console.Write("Invalid input. Enter quantity again: ");
+                }
+
+                items.Add((orderProductId, orderQuantity));
+
+                Console.Write("Add another product? (y/n): ");
+                var more = Console.ReadLine();
+
+                if (more?.ToLower() != "y")
+                {
+                    addingProducts = false;
+                }
+            }
+
+            inventory.CreateFullOrder(customerId, items);
+
             break;
 
         default:
