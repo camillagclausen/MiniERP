@@ -1,15 +1,16 @@
 # MiniERP System
 
-A console-based ERP-style system built in C# using .NET and SQLite.
+A simple ERP-style console application built in C# using .NET and Entity Framework Core.
 
 ## Features
 
-- Product management (add + view inventory)
-- Customer management
+- Add and manage products
+- Manage customers using phone number as unique ID
 - Create orders with multiple products
 - Automatic stock updates
-- Order receipts with total price
-- Data persistence using SQLite database
+- Order receipt with total calculation
+- View customers and order history
+- Reset database with demo data
 
 ## Technologies
 
@@ -24,25 +25,35 @@ A console-based ERP-style system built in C# using .NET and SQLite.
 2. Navigate to the project folder
 3. Run:
 
+dotnet ef database update
 dotnet run
 
-## Example flow
+## Demo data
 
-1. Add a customer
-2. Add products
-3. Create a full order
-4. View inventory updates
+You can quickly load demo data using:
+
+Menu → "Reboot database"
+
+Includes:
+- 3 products (posters)
+- 1 customer
 
 ## Project structure
 
 - Models/ → Data models (Product, Customer, Order, OrderLine)
 - Services/ → Business logic
 - Data/ → Database context
-- Program.cs → Main UI / menu
+- Program.cs → Console UI
+
+## Key design choices
+
+- Customer uses phone number as primary key
+- Separation of concerns (models, services, data)
+- Database handled via Entity Framework migrations
 
 ## Future improvements
 
-- Show order history
-- Invoice generation
+- Input validation (phone number format)
+- Edit/delete functionality
 - REST API
-- UI (web or desktop)
+- GUI (web or desktop)
