@@ -1,0 +1,14 @@
+/Users/camillagrubak/Projects/MiniERP/bin/Debug/net10.0/MiniERP
+/Users/camillagrubak/Projects/MiniERP/bin/Debug/net10.0/MiniERP.deps.json
+/Users/camillagrubak/Projects/MiniERP/bin/Debug/net10.0/MiniERP.runtimeconfig.json
+/Users/camillagrubak/Projects/MiniERP/bin/Debug/net10.0/MiniERP.dll
+/Users/camillagrubak/Projects/MiniERP/bin/Debug/net10.0/MiniERP.pdb
+/Users/camillagrubak/Projects/MiniERP/obj/Debug/net10.0/MiniERP.GeneratedMSBuildEditorConfig.editorconfig
+/Users/camillagrubak/Projects/MiniERP/obj/Debug/net10.0/MiniERP.AssemblyInfoInputs.cache
+/Users/camillagrubak/Projects/MiniERP/obj/Debug/net10.0/MiniERP.AssemblyInfo.cs
+/Users/camillagrubak/Projects/MiniERP/obj/Debug/net10.0/MiniERP.csproj.CoreCompileInputs.cache
+/Users/camillagrubak/Projects/MiniERP/obj/Debug/net10.0/MiniERP.dll
+/Users/camillagrubak/Projects/MiniERP/obj/Debug/net10.0/refint/MiniERP.dll
+/Users/camillagrubak/Projects/MiniERP/obj/Debug/net10.0/MiniERP.pdb
+/Users/camillagrubak/Projects/MiniERP/obj/Debug/net10.0/MiniERP.genruntimeconfig.cache
+/Users/camillagrubak/Projects/MiniERP/obj/Debug/net10.0/ref/MiniERP.dll
