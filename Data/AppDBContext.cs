@@ -11,5 +11,13 @@ public class AppDBContext : DbContext
     public DbSet<OrderLine> OrderLines { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
-        => options.UseSqlite("Data Source=mini_erp.db");
+    {
+        options.UseSqlite("Data Source=mini_erp.db");
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Customer>()
+            .HasKey(c => c.PhoneNumber);
+    }
 }

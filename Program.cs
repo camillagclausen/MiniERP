@@ -4,20 +4,21 @@ using MiniERP.Services;
 
 var inventory = new InventoryService();
 
-inventory.AddCustomer(new Customer { Name = "Test Customer" });
-
 bool running = true;
 
 while (running)
 {
     Console.Clear();
     Console.WriteLine("=== Mini ERP System ===");
-    Console.WriteLine("0. Exit");
     Console.WriteLine("1. Add product");
     Console.WriteLine("2. Show inventory");
     Console.WriteLine("3. Create order");
     Console.WriteLine("4. Add customer");
     Console.WriteLine("5. Create full order");
+    Console.WriteLine("6. Show customers");
+    Console.WriteLine("7. Show orders");
+    Console.WriteLine("8. Reboot database (demo data)");
+    Console.WriteLine("0. Exit");
     Console.WriteLine("------------------------");
     Console.Write("Choose an option: ");
 
@@ -74,25 +75,23 @@ while (running)
             break;
 
         case "4":
+            Console.Write("Phone number: ");
+            var phone = Console.ReadLine();
+
             Console.Write("Customer name: ");
             var customerName = Console.ReadLine();
 
             inventory.AddCustomer(new Customer
             {
+                PhoneNumber = phone ?? "",
                 Name = customerName ?? ""
             });
 
-            Console.WriteLine("Customer added!");
             break;
 
         case "5":
-            Console.Write("Customer ID: ");
-            int customerId;
-
-            while (!int.TryParse(Console.ReadLine(), out customerId))
-            {
-                Console.Write("Invalid input. Enter customer ID again: ");
-            }
+            Console.Write("Customer phone number: ");
+            string phoneNumber = Console.ReadLine() ?? "";
 
             var items = new List<(int productId, int quantity)>();
 
@@ -101,7 +100,7 @@ while (running)
             while (addingProducts)
             {
                 Console.Write("Product ID: ");
-                int orderProductId;   // 👈 ændret navn
+                int orderProductId;
 
                 while (!int.TryParse(Console.ReadLine(), out orderProductId))
                 {
@@ -109,7 +108,7 @@ while (running)
                 }
 
                 Console.Write("Quantity: ");
-                int orderQuantity;    // 👈 ændret navn
+                int orderQuantity;
 
                 while (!int.TryParse(Console.ReadLine(), out orderQuantity))
                 {
@@ -127,8 +126,20 @@ while (running)
                 }
             }
 
-            inventory.CreateFullOrder(customerId, items);
+            inventory.CreateFullOrder(phoneNumber, items);
 
+            break;
+
+        case "6":
+            inventory.ShowCustomers();
+            break;
+
+        case "7":
+            inventory.ShowOrders();
+            break;
+
+        case "8":
+            inventory.RebootDatabase();
             break;
 
         default:

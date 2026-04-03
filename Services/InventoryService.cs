@@ -6,7 +6,6 @@ namespace MiniERP.Services;
 public class InventoryService
 {
     private AppDBContext context = new AppDBContext();
-    private int nextId = 1;
 
     public void AddProduct(Product product)
     {
@@ -56,68 +55,168 @@ public class InventoryService
 
     public void AddCustomer(Customer customer)
     {
+        var existing = context.Customers
+            .FirstOrDefault(c => c.PhoneNumber == customer.PhoneNumber);
+
+        if (existing != null)
+        {
+            Console.WriteLine("Customer with this phone number already exists.");
+            return;
+        }
+
         context.Customers.Add(customer);
         context.SaveChanges();
+
+        Console.WriteLine("Customer added!");
     }
 
-    public void CreateFullOrder(int customerId, List<(int productId, int quantity)> items)
-{
-    var customer = context.Customers.FirstOrDefault(c => c.Id == customerId);
-
-    if (customer == null)
+    public void CreateFullOrder(string phoneNumber, List<(int productId, int quantity)> items)
     {
-        Console.WriteLine("Customer not found");
-        return;
+        var customer = context.Customers.FirstOrDefault(c => c.PhoneNumber == phoneNumber);
+
+        if (customer == null)
+        {
+            Console.WriteLine("Customer not found");
+            return;
+        }
+
+        var order = new Order
+        {
+            CustomerId = phoneNumber,
+            OrderLines = new List<OrderLine>()
+        };
+
+        decimal total = 0;
+
+        Console.WriteLine("\n--- Order Receipt ---");
+        Console.WriteLine($"Customer: {customer.Name}");
+        Console.WriteLine("\nProducts:");
+
+        foreach (var item in items)
+        {
+            var product = context.Products.FirstOrDefault(p => p.Id == item.productId);
+
+            if (product == null)
+            {
+                Console.WriteLine($"Product {item.productId} not found");
+                continue;
+            }
+
+            if (product.Stock < item.quantity)
+            {
+                Console.WriteLine($"Not enough stock for {product.Name}");
+                continue;
+            }
+
+            product.Stock -= item.quantity;
+
+            var lineTotal = product.Price * item.quantity;
+            total += lineTotal;
+
+            Console.WriteLine($"- {product.Name} x{item.quantity} = {lineTotal}");
+
+            order.OrderLines.Add(new OrderLine
+            {
+                ProductId = product.Id,
+                Quantity = item.quantity
+            });
+        }
+
+        context.Orders.Add(order);
+        context.SaveChanges();
+
+        Console.WriteLine("\n----------------------");
+        Console.WriteLine($"Total: {total}");
+        Console.WriteLine("----------------------");
+        Console.WriteLine("Order created successfully!");
     }
 
-    var order = new Order
+    public void ShowOrders()
     {
-        CustomerId = customerId,
-        OrderLines = new List<OrderLine>()
-    };
+        var orders = context.Orders
+            .Select(o => new
+            {
+                o.Id,
+                CustomerName = o.Customer!.Name,
+                Lines = o.OrderLines.Select(ol => new
+                {
+                    ProductName = ol.Product!.Name,
+                    Price = ol.Product!.Price,
+                    ol.Quantity,
+                }).ToList()
+            })
+            .ToList();
 
-    decimal total = 0;
-
-    Console.WriteLine("\n--- Order Receipt ---");
-    Console.WriteLine($"Customer: {customer.Name}");
-    Console.WriteLine("\nProducts:");
-
-    foreach (var item in items)
-    {
-        var product = context.Products.FirstOrDefault(p => p.Id == item.productId);
-
-        if (product == null)
+        if (orders.Count == 0)
         {
-            Console.WriteLine($"Product {item.productId} not found");
-            continue;
+            Console.WriteLine("No orders found.");
+            return;
         }
 
-        if (product.Stock < item.quantity)
+        Console.WriteLine("\n--- Orders ---");
+
+        foreach (var order in orders)
         {
-            Console.WriteLine($"Not enough stock for {product.Name}");
-            continue;
+            Console.WriteLine($"\nOrder #{order.Id}");
+            Console.WriteLine($"Customer: {order.CustomerName}");
+
+            decimal total = 0;
+
+            foreach (var line in order.Lines)
+            {
+                var lineTotal = line.Price * line.Quantity;
+                total += lineTotal;
+
+                Console.WriteLine($"- {line.ProductName} x{line.Quantity} = {lineTotal}");
+            }
+
+            Console.WriteLine($"Total: {total}");
+        }
+    }
+
+    public void ShowCustomers()
+    {
+        var customers = context.Customers.ToList();
+
+        if (customers.Count == 0)
+        {
+            Console.WriteLine("No customers found.");
+            return;
         }
 
-        product.Stock -= item.quantity;
+        Console.WriteLine("\n--- Customers ---");
 
-        var lineTotal = product.Price * item.quantity;
-        total += lineTotal;
-
-        Console.WriteLine($"- {product.Name} x{item.quantity} = {lineTotal}");
-
-        order.OrderLines.Add(new OrderLine
+        foreach (var customer in customers)
         {
-            ProductId = product.Id,
-            Quantity = item.quantity
+            Console.WriteLine($"Phone: {customer.PhoneNumber} | Name: {customer.Name}");
+        }
+    }
+
+    public void RebootDatabase()
+    {
+        // Ryd database
+        context.OrderLines.RemoveRange(context.OrderLines);
+        context.Orders.RemoveRange(context.Orders);
+        context.Products.RemoveRange(context.Products);
+        context.Customers.RemoveRange(context.Customers);
+        context.SaveChanges();
+
+        // Tilføj produkter
+        context.Products.AddRange(
+            new Product { Name = "Blue Poster", Price = 5.99m, Stock = 1200 },
+            new Product { Name = "Red Poster", Price = 7.99m, Stock = 1000 },
+            new Product { Name = "Green Poster", Price = 3.99m, Stock = 900 }
+        );
+
+        // Tilføj kunde
+        context.Customers.Add(new Customer
+        {
+            PhoneNumber = "42745004",
+            Name = "Camilla Grubak"
         });
+
+        context.SaveChanges();
+
+        Console.WriteLine("Database rebooted with demo data!");
     }
-
-    context.Orders.Add(order);
-    context.SaveChanges();
-
-    Console.WriteLine("\n----------------------");
-    Console.WriteLine($"Total: {total}");
-    Console.WriteLine("----------------------");
-    Console.WriteLine("Order created successfully!");
-}
 }
