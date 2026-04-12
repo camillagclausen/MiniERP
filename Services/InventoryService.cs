@@ -1,11 +1,17 @@
 using MiniERP.Models;
 using MiniERP.Data;
+using MiniERP.DTOs;
 
 namespace MiniERP.Services;
 
 public class InventoryService
 {
-    private AppDBContext context = new AppDBContext();
+    private readonly AppDBContext context;
+
+    public InventoryService(AppDBContext context)
+    {
+        this.context = context;
+    }
 
     public void AddProduct(Product product)
     {
@@ -53,83 +59,140 @@ public class InventoryService
         Console.WriteLine($"Order created! Remaining stock: {product.Stock}");
     }
 
-    public void AddCustomer(Customer customer)
-    {
-        var existing = context.Customers
-            .FirstOrDefault(c => c.PhoneNumber == customer.PhoneNumber);
+    // public void AddCustomer(Customer customer)
+    // {
+    //     var existing = context.Customers
+    //         .FirstOrDefault(c => c.PhoneNumber == customer.PhoneNumber);
 
-        if (existing != null)
+    //     if (existing != null)
+    //     {
+    //         Console.WriteLine("Customer with this phone number already exists.");
+    //         return;
+    //     }
+
+    //     context.Customers.Add(customer);
+    //     context.SaveChanges();
+
+    //     Console.WriteLine("Customer added!");
+    // }
+
+    public (bool Success, string Message, OrderReceiptDto? Receipt) CreateFullOrder(string customerId, List<OrderItemDto> items)
+    {
+        var customer = context.Customers.FirstOrDefault(c => c.PhoneNumber == customerId);
+        var receipt = new OrderReceiptDto
         {
-            Console.WriteLine("Customer with this phone number already exists.");
-            return;
-        }
-
-        context.Customers.Add(customer);
-        context.SaveChanges();
-
-        Console.WriteLine("Customer added!");
-    }
-
-    public void CreateFullOrder(string phoneNumber, List<(int productId, int quantity)> items)
-    {
-        var customer = context.Customers.FirstOrDefault(c => c.PhoneNumber == phoneNumber);
+            Customer = customer.Name
+        };
 
         if (customer == null)
-        {
-            Console.WriteLine("Customer not found");
-            return;
-        }
+            return (false, "Customer not found", null);
 
         var order = new Order
         {
-            CustomerId = phoneNumber,
+            CustomerId = customerId,
             OrderLines = new List<OrderLine>()
         };
 
         decimal total = 0;
 
-        Console.WriteLine("\n--- Order Receipt ---");
-        Console.WriteLine($"Customer: {customer.Name}");
-        Console.WriteLine("\nProducts:");
-
         foreach (var item in items)
         {
-            var product = context.Products.FirstOrDefault(p => p.Id == item.productId);
+            var product = context.Products.FirstOrDefault(p => p.Id == item.ProductId);
 
             if (product == null)
-            {
-                Console.WriteLine($"Product {item.productId} not found");
-                continue;
-            }
+                return (false, "Product not found", null);
 
-            if (product.Stock < item.quantity)
-            {
-                Console.WriteLine($"Not enough stock for {product.Name}");
-                continue;
-            }
+            if (product.Stock < item.Quantity)
+                return (false, "Not enough stock", null);
 
-            product.Stock -= item.quantity;
+            product.Stock -= item.Quantity;
 
-            var lineTotal = product.Price * item.quantity;
+            var lineTotal = product.Price * item.Quantity;
             total += lineTotal;
-
-            Console.WriteLine($"- {product.Name} x{item.quantity} = {lineTotal}");
 
             order.OrderLines.Add(new OrderLine
             {
                 ProductId = product.Id,
-                Quantity = item.quantity
+                Quantity = item.Quantity
+            });
+
+            receipt.Items.Add(new OrderLineReceiptDto
+            {
+                Product = product.Name,
+                Quantity = item.Quantity,
+                Price = product.Price,
+                LineTotal = lineTotal
             });
         }
 
+        receipt.Total = total;
+
         context.Orders.Add(order);
         context.SaveChanges();
-
-        Console.WriteLine("\n----------------------");
-        Console.WriteLine($"Total: {total}");
-        Console.WriteLine("----------------------");
-        Console.WriteLine("Order created successfully!");
+        
+        return (true, "Order created", receipt);
     }
+
+    // public void CreateFullOrder(string phoneNumber, List<(int productId, int quantity)> items)
+    // {
+    //     var customer = context.Customers.FirstOrDefault(c => c.PhoneNumber == phoneNumber);
+
+    //     if (customer == null)
+    //     {
+    //         Console.WriteLine("Customer not found");
+    //         return;
+    //     }
+
+    //     var order = new Order
+    //     {
+    //         CustomerId = phoneNumber,
+    //         OrderLines = new List<OrderLine>()
+    //     };
+
+    //     decimal total = 0;
+
+    //     Console.WriteLine("\n--- Order Receipt ---");
+    //     Console.WriteLine($"Customer: {customer.Name}");
+    //     Console.WriteLine("\nProducts:");
+
+    //     foreach (var item in items)
+    //     {
+    //         var product = context.Products.FirstOrDefault(p => p.Id == item.productId);
+
+    //         if (product == null)
+    //         {
+    //             Console.WriteLine($"Product {item.productId} not found");
+    //             continue;
+    //         }
+
+    //         if (product.Stock < item.quantity)
+    //         {
+    //             Console.WriteLine($"Not enough stock for {product.Name}");
+    //             continue;
+    //         }
+
+    //         product.Stock -= item.quantity;
+
+    //         var lineTotal = product.Price * item.quantity;
+    //         total += lineTotal;
+
+    //         Console.WriteLine($"- {product.Name} x{item.quantity} = {lineTotal}");
+
+    //         order.OrderLines.Add(new OrderLine
+    //         {
+    //             ProductId = product.Id,
+    //             Quantity = item.quantity
+    //         });
+    //     }
+
+    //     context.Orders.Add(order);
+    //     context.SaveChanges();
+
+    //     Console.WriteLine("\n----------------------");
+    //     Console.WriteLine($"Total: {total}");
+    //     Console.WriteLine("----------------------");
+    //     Console.WriteLine("Order created successfully!");
+    // }
 
     public void ShowOrders()
     {
@@ -174,22 +237,21 @@ public class InventoryService
         }
     }
 
-    public void ShowCustomers()
+     public List<Customer> GetCustomers()
     {
-        var customers = context.Customers.ToList();
+        return context.Customers.ToList();
+    }
 
-        if (customers.Count == 0)
-        {
-            Console.WriteLine("No customers found.");
-            return;
-        }
+    public bool AddCustomer(Customer customer)
+    {
+        var exists = context.Customers.Any(c => c.PhoneNumber == customer.PhoneNumber);
 
-        Console.WriteLine("\n--- Customers ---");
+        if (exists)
+            return false;
 
-        foreach (var customer in customers)
-        {
-            Console.WriteLine($"Phone: {customer.PhoneNumber} | Name: {customer.Name}");
-        }
+        context.Customers.Add(customer);
+        context.SaveChanges();
+        return true;
     }
 
     public void RebootDatabase()
@@ -218,5 +280,10 @@ public class InventoryService
         context.SaveChanges();
 
         Console.WriteLine("Database rebooted with demo data!");
+    }
+
+    public List<Product> GetProducts()
+    {
+        return context.Products.ToList();
     }
 }

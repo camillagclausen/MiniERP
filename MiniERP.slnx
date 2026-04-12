@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="MiniERP.API/MiniERP.API.csproj" />
+  <Project Path="MiniERP.csproj" />
+</Solution>
