@@ -1,59 +1,52 @@
-# MiniERP System
+# Mini ERP System
 
-A simple ERP-style console application built in C# using .NET and Entity Framework Core.
+Et simpelt mini ERP-system udviklet som fritidsprojekt for at demonstrere mine kompetencer inden for C#, .NET og backend-udvikling.
 
-## Features
+## 🚀 Teknologier
 
-- Add and manage products
-- Manage customers using phone number as unique ID
-- Create orders with multiple products
-- Automatic stock updates
-- Order receipt with total calculation
-- View customers and order history
-- Reset database with demo data
+* C# / .NET 8
+* ASP.NET Core Web API
+* Entity Framework Core
+* SQLite
+* Swagger (API dokumentation)
 
-## Technologies
+## 📦 Funktionalitet
 
-- C#
-- .NET
-- Entity Framework Core
-- SQLite
+Systemet indeholder grundlæggende funktionalitet til håndtering af:
 
-## How to run
+* Kunder
+* Produkter
+* Ordrer
+* Lager/logik via service layer
 
-1. Clone the repository
-2. Navigate to the project folder
-3. Run:
+Der er implementeret simpel forretningslogik, hvor ordrer oprettes med tilhørende order lines, og lager opdateres.
 
-dotnet ef database update
-dotnet run
+## 🔧 Struktur
 
-## Demo data
+Løsningen er opdelt i flere projekter:
 
-You can quickly load demo data using:
+* `MiniERP` – Core (modeller, services, database)
+* `MiniERP.API` – REST API (controllers og endpoints)
 
-Menu → "Reboot database"
+## ▶️ Sådan kører du projektet
 
-Includes:
-- 3 products (posters)
-- 1 customer
+1. Installer .NET 8
+2. Kør følgende kommando i terminalen:
 
-## Project structure
+```bash
+dotnet run --project MiniERP.API
+```
 
-- Models/ → Data models (Product, Customer, Order, OrderLine)
-- Services/ → Business logic
-- Data/ → Database context
-- Program.cs → Console UI
+3. Åbn Swagger i browseren (URL vises i terminalen, fx):
 
-## Key design choices
+```
+http://localhost:5000/swagger
+```
 
-- Customer uses phone number as primary key
-- Separation of concerns (models, services, data)
-- Database handled via Entity Framework migrations
+## 💡 Formål
 
-## Future improvements
+Projektet er udviklet i min fritid for at opbygge og demonstrere mine kompetencer som datamatiker med fokus på både teknik og forretningsforståelse.
 
-- Input validation (phone number format)
-- Edit/delete functionality
-- REST API
-- GUI (web or desktop)
+## 🔗 GitHub
+
+https://github.com/camillagclausen/MiniERP
